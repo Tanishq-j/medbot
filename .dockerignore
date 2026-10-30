@@ -1,0 +1,21 @@
+# Virtual environments & caches
+.venv/
+venv/
+env/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Git and editor metadata
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Environment files & docs
+.env
+*.md
+DOCKER_LAB_GUIDE.*
+.DS_Store
+Thumbs.db
+

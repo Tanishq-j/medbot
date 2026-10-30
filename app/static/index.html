@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MedBot — Multi-Agent Medical Assistant</title>
+  <meta name="description" content="Collaborative multi-agent clinical guidance powered by Agno and Groq/Gemini.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-group">
+        <div class="brand-badge">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-name">MedBot</div>
+          <div class="brand-meta">Multi-Agent Medical Assistant</div>
+        </div>
+      </div>
+
+      <div class="topbar-right">
+        <div class="system-status" id="systemStatus">
+          <span class="status-dot"></span>
+          <span id="statusLabel">Checking backend...</span>
+        </div>
+        <span class="model-tag" id="modelTag">Agno &bull; Clinical</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Medical Notice Bar -->
+  <div class="disclaimer-strip">
+    <div class="disclaimer-strip-inner">
+      <span class="alert-icon">ℹ</span>
+      <span><strong>Clinical Information Notice:</strong> MedBot is an educational assistant providing evidence-based medical analysis and clinical guideline context. It does not provide formal diagnosis, treatment, or create a doctor-patient relationship.</span>
+    </div>
+  </div>
+
+  <!-- Main Container -->
+  <main class="main-wrapper">
+    <div class="layout-grid">
+      
+      <!-- Left Panel: Input & Multi-Agent Flow -->
+      <div class="column-left">
+        <div class="surface-card">
+          <div class="card-head">
+            <h2 class="card-heading">Clinical Inquiry</h2>
+            <span class="subtext">Pose a clinical question, symptom scenario, or vital readings</span>
+          </div>
+
+          <form id="legalForm">
+            <div class="input-container">
+              <label for="questionInput" class="field-label">Describe the medical situation, symptoms, or medication</label>
+              <textarea
+                id="questionInput"
+                rows="6"
+                maxlength="2000"
+                placeholder="E.g., What are the diagnostic criteria, first-line lifestyle interventions, and monitoring targets for newly diagnosed Stage 1 Hypertension?"
+                required
+              ></textarea>
+              <div class="input-foot">
+                <span class="hint-text">Include relevant vitals, duration, or medication details</span>
+                <span class="char-tracker"><span id="charCount">0</span>/2000</span>
+              </div>
+            </div>
+
+            <!-- Sample Queries -->
+            <div class="suggestions-wrapper">
+              <div class="suggestions-label">Common Topics:</div>
+              <div class="suggestions-list">
+                <button type="button" class="suggestion-chip" data-query="What are the diagnostic thresholds, first-line lifestyle interventions, and target readings for Stage 1 Hypertension under ACC/AHA guidelines?">
+                  Hypertension &amp; BP Targets
+                </button>
+                <button type="button" class="suggestion-chip" data-query="What are the target HbA1c goals for non-pregnant adults with Type 2 Diabetes, and what are the exact steps of the Rule of 15 for acute hypoglycemia?">
+                  Type 2 Diabetes &amp; Glycemic Rules
+                </button>
+                <button type="button" class="suggestion-chip" data-query="What are the maximum safe daily limits for paracetamol to prevent hepatotoxicity, and what are the primary renal and gastrointestinal contraindications for NSAIDs?">
+                  Paracetamol &amp; NSAID Safety
+                </button>
+                <button type="button" class="suggestion-chip" data-query="What are the critical red flag signs of Acute Coronary Syndrome and the FAST protocol criteria that mandate immediate emergency activation?">
+                  Chest Pain &amp; Stroke Triage
+                </button>
+              </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="action-bar">
+              <button type="button" id="clearBtn" class="btn btn-ghost">Clear</button>
+              <button type="submit" id="submitBtn" class="btn btn-primary">
+                <span>Analyze Inquiry</span>
+                <svg class="btn-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- Coordinated Multi-Agent Team Card -->
+        <div class="surface-card agent-pipeline-card">
+          <div class="card-head">
+            <h3 class="card-heading-sm">Agno Multi-Agent Pipeline</h3>
+            <span class="badge-pill">3 Agents Active</span>
+          </div>
+
+          <div class="pipeline-track">
+            <div class="pipeline-step" id="pipe1">
+              <div class="step-indicator">1</div>
+              <div class="step-body">
+                <div class="step-title">Medical Query Analyzer</div>
+                <div class="step-desc">Classifies specialty, extracts vitals, frames clinical issues.</div>
+              </div>
+            </div>
+            <div class="pipeline-step" id="pipe2">
+              <div class="step-indicator">2</div>
+              <div class="step-body">
+                <div class="step-title">Medical Research Agent</div>
+                <div class="step-desc">Invokes library search for clinical guidelines, dosing, and safety.</div>
+              </div>
+            </div>
+            <div class="pipeline-step" id="pipe3">
+              <div class="step-indicator">3</div>
+              <div class="step-body">
+                <div class="step-title">Medical Answer Reviewer</div>
+                <div class="step-desc">Audits claims, eliminates hallucinations, formats clinical memo.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Output & Citations -->
+      <div class="column-right">
+        <div class="surface-card result-card">
+          <div class="card-head between">
+            <div>
+              <h2 class="card-heading">Clinical Analysis &amp; Findings</h2>
+              <span class="subtext">Multi-agent clinical advisory memorandum</span>
+            </div>
+            <div class="response-actions">
+              <button type="button" id="copyBtn" class="btn btn-outline btn-sm" style="display: none;" title="Copy to clipboard">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                  <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                </svg>
+                <span>Copy</span>
+              </button>
+              <button type="button" id="printBtn" class="btn btn-outline btn-sm" style="display: none;" title="Print or save as PDF">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                  <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                  <rect x="6" y="14" width="12" height="8"></rect>
+                </svg>
+                <span>Print</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Empty State -->
+          <div id="emptyView" class="empty-view">
+            <div class="empty-glyph">🩺</div>
+            <h3>Ready for Clinical Analysis</h3>
+            <p>Enter a clinical question or select one of the common topics to run the multi-agent medical review workflow.</p>
+          </div>
+
+          <!-- Processing State -->
+          <div id="loadingView" class="loading-view" style="display: none;">
+            <div class="spinner-ring"></div>
+            <div class="loading-label" id="loadingLabel">Agents collaborating...</div>
+            <div class="loading-caption" id="loadingCaption">Step 1/3: Analyzing inquiry structure and patient facts...</div>
+          </div>
+
+          <!-- Error Message Banner -->
+          <div id="errorView" class="error-banner" style="display: none;">
+            <span class="error-glyph">⚠</span>
+            <div class="error-msg" id="errorMsg"></div>
+          </div>
+
+          <!-- Final Response Content -->
+          <div id="responseView" class="response-view" style="display: none;">
+            <!-- Memo Header Strip -->
+            <div class="memo-header-strip">
+              <div class="memo-meta-left">
+                <span class="memo-badge">CLINICAL MEMORANDUM</span>
+                <span class="memo-timestamp" id="memoTimestamp">Advisory Findings</span>
+              </div>
+              <div class="memo-meta-right">
+                <span class="memo-agents-pill">3 Agents Collaborated</span>
+              </div>
+            </div>
+
+            <!-- Consulted Sources Pill List -->
+            <div id="sourcesBlock" class="sources-panel" style="display: none;">
+              <div class="sources-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+                <span>Grounding Guidelines Consulted</span>
+              </div>
+              <div id="sourcesTags" class="sources-tags"></div>
+            </div>
+
+            <!-- Formatted Markdown Answer -->
+            <article id="answerArticle" class="answer-article"></article>
+
+            <!-- Verification & Disclaimer Footer -->
+            <div class="result-footer">
+              <div class="verified-tag">
+                <span class="verified-icon">✓</span>
+                <span>Reviewed by Medical Answer Reviewer</span>
+              </div>
+              <p id="disclaimerNotice" class="disclaimer-copy"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- App Footer -->
+  <footer class="app-footer">
+    <div class="footer-inner">
+      <span>MedBot &bull; Multi-Agent Medical Assistant</span>
+      <span class="footer-sep">&bull;</span>
+      <span>FastAPI + Agno Framework + Groq/Gemini</span>
+      <span class="footer-sep">&bull;</span>
+      <span>Educational GenAI &amp; ML DevOps Distribution</span>
+    </div>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
